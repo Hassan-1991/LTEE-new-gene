@@ -26,7 +26,3 @@ paste 50000gen_bams 50000gen_test | sed "s/^/time htseq-count -f bam -a 0 -t CDS
 rev 50000gen_bams | cut -f 1 -d '/' | rev | cut -f 1 -d '_' | sed "s/-/,/g" | sed "s/am//g" | sed "s/ap//g" | sed "s/AraR6/REL606/g" | sed "s/AraR7/REL607/g" > 50000gen_htseqstep4
 paste 50000gen_htseqstep3 50000gen_htseqstep4 | sed "s/\t/ \| sed \"s\/\^\//g" | sed "s/$/,\/g\"/g" | sed "s/$/ \| sed \"s\/TAB\/\,\/g\" >> htseq_50000gen_400bp_count.csv/g" | sed "s/TAB/\t/g" > htseq_50000gen_400bp_code.sh
 bash htseq_50000gen_400bp_code.sh
-
-#meanTPM
-#diffex
-#marking
