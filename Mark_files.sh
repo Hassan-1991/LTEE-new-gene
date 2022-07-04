@@ -39,3 +39,7 @@ bash marking_code.sh
 
 for file in *mark1.csv; do sed -i "s/AraM/Ara-/g" $file; done
 for file in *mark1.csv; do sed -i "s/AraP/Ara+/g" $file; done
+for file in *mark1.csv; do sed -i "s/antisense/noncoding/g" $file; done
+for file in *mark1.csv; do sed -i "s/intergenic/noncoding/g" $file; done
+sed "s/REL6061/Ancestor_1/g" htseq_time_series_400bp_namesorted_count_mark1.csv | sed "s/REL6062/Ancestor_2/g" | sed "s/ZDB409/5000/g" | sed "s/ZDB425/10000/g" | sed "s/ZDB445/15000/g" | sed "s/ZDB467/20000/g" | sed "s/ZDB483/25000_1/g" | sed "s/ZDB486/25000_2/g" | sed "s/ZDB488/25000_3/g" | sed "s/ZDB309/27000/g" | sed "s/ZDB17/30000/g" | sed "s/ZDB199/31500_1/g" | sed "s/ZDB200/31500_2/g" | sed "s/ZDB25/31500_3/g" | sed "s/ZDB564/31500_4/g" | sed "s/CZB154/33000/g" > htseq_time_series_400bp_namesorted_count_mark3.csv && mv htseq_time_series_400bp_namesorted_count_mark2.csv htseq_time_series_400bp_namesorted_count_mark1.csv
+sed "s/REL6061/Ancestor_1/g" htseq_time_series_400bp_namesorted_foldchanges_mark1.csv | sed "s/REL6062/Ancestor_2/g" | sed "s/ZDB409/5000/g" | sed "s/ZDB425/10000/g" | sed "s/ZDB445/15000/g" | sed "s/ZDB467/20000/g" | sed "s/ZDB483/25000_1/g" | sed "s/ZDB486/25000_2/g" | sed "s/ZDB488/25000_3/g" | sed "s/ZDB309/27000/g" | sed "s/ZDB17/30000/g" | sed "s/ZDB199/31500_1/g" | sed "s/ZDB200/31500_2/g" | sed "s/ZDB25/31500_3/g" | sed "s/ZDB564/31500_4/g" | sed "s/CZB154/33000/g" > htseq_time_series_400bp_namesorted_count_mark3.csv && mv htseq_time_series_400bp_namesorted_foldchanges_mark2.csv htseq_time_series_400bp_namesorted_foldchanges_mark1.csv
