@@ -36,3 +36,6 @@ sed "s/time_series/50000gen/g" ts_fc_code.sh | sed "s/_namesorted//g" | sed "s/f
 sed "s/foldchanges/count/g" ts_fc_code.sh | sed "s/generation,strain,target_id,baseMean,log2FoldChange,lfcSE,pvalue,padj/generation,strain,replicate,target_id,est_counts/g" > ts_count_code.sh
 cat *.sh > marking_code.sh
 bash marking_code.sh
+
+for file in *mark1.csv; do sed -i "s/AraM/Ara-/g" $file; done
+for file in *mark1.csv; do sed -i "s/AraP/Ara+/g" $file; done
