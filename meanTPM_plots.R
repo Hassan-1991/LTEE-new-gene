@@ -38,6 +38,7 @@ test2_nons %>%
   ggplot(aes(x=line,fill=rt_status)) +
   geom_bar(position="stack", color = "azure4",width=0.75) +
   #scale_fill_manual(values=c("grey67","cornflowerblue")) +
+  #scale_fill_manual(values=c("cyan","darkblue")) +
   scale_fill_manual(values=c("lightcyan1","cornflowerblue")) +
   ylim(0,300) +
   theme(
@@ -95,6 +96,7 @@ test2_nons %>%
   ggplot(aes(x=strain,fill=rt_status)) +
   geom_bar(position="stack", color = "azure4",width=0.75) +
   #scale_fill_manual(values=c("grey67","cornflowerblue")) +
+  #scale_fill_manual(values=c("cyan","darkblue")) +
   scale_fill_manual(values=c("lightcyan1","cornflowerblue")) +
   #ylim(0,300) +
   theme(
