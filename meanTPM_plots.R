@@ -53,7 +53,7 @@ test2_nons %>%
     axis.text.x = element_text(size = 12),
     axis.text.y = element_text(size = 12),
     legend.position = "none") +
-  xlab("Lines")+
+  xlab("Evolved lines")+
   ylab("Non-coding windows with normalized read counts (TPM) > 5")
   
 #timeseries
@@ -111,5 +111,5 @@ test2_nons %>%
     axis.text.x = element_text(size = 12),
     axis.text.y = element_text(size = 12),
     legend.position = "none") +
-  xlab("Lines")+
+  xlab("Evolved lines")+
   ylab("Non-coding windows with normalized read counts (TPM) > 5")
