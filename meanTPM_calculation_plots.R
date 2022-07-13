@@ -86,7 +86,7 @@ test2_nons <- test2 %>%
   #filter(seqtype=="ribo") %>%
   #filter(seqtype=="rna") %>%
   filter(above5PM=="YES")
-test2_nons$strain <- factor(test2_nons$strain,levels = c("Ancestor_1","Ancestor_2","5000","10000","15000","20000","25000_1","25000_2","25000_3","27000","30000","31500_1","31500_2","31500_3","31500_4","33000"))
+test2_nons$strain <- factor(test2_nons$strain,levels = c("REL606","REL607","5000","10000","15000","20000","25000_1","25000_2","25000_3","27000","30000","31500_1","31500_2","31500_3","31500_4","33000"))
 #test2_nons$seqtype <- factor(test2_nons$seqtype,levels = c("rna","ribo"))
 test2_nons$rt_status <- factor(test2_nons$rt_status,levels = c("readthrough","noncoding"))
 
