@@ -28,7 +28,7 @@ test2_nons <- test2 %>%
   filter(seqtype=="ribo") %>%
   #filter(seqtype=="rna") %>%
   filter(above5PM=="YES")
-test2_nons$line <- factor(test2_nons$line,levels = c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6"))
+test2_nons$line <- factor(test2_nons$line,levels = c("REL606","REL607","Ara+1","Ara+2","Ara+4","Ara+5","Ara-5","Ara-6","Ara-1","Ara-2","Ara-3","Ara-4","Ara+3"))
 test2_nons$seqtype <- factor(test2_nons$seqtype,levels = c("rna","ribo"))
 test2_nons$rt_status <- factor(test2_nons$rt_status,levels = c("readthrough","noncoding"))
 
