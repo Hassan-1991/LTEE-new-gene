@@ -28,7 +28,8 @@ test2_nons <- test2 %>%
   filter(seqtype=="ribo") %>%
   #filter(seqtype=="rna") %>%
   filter(above5PM=="YES")
-test2_nons$line <- factor(test2_nons$line,levels = c("REL606","REL607","Ara+1","Ara+2","Ara+4","Ara+5","Ara-5","Ara-6","Ara-1","Ara-2","Ara-3","Ara-4","Ara+3"))
+#test2_nons$line <- factor(test2_nons$line,levels = c("REL606","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara+6"))
+test2_nons$line <- factor(test2_nons$line,levels = c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6"))
 test2_nons$seqtype <- factor(test2_nons$seqtype,levels = c("rna","ribo"))
 test2_nons$rt_status <- factor(test2_nons$rt_status,levels = c("readthrough","noncoding"))
 
@@ -48,13 +49,16 @@ test2_nons %>%
     panel.grid.minor = element_blank(), #remove minor gridlines
     legend.background = element_rect(fill='transparent'), #transparent legend bg
     legend.box.background = element_rect(fill='transparent'),
-    axis.title.x = element_text(size = 14),
-    axis.title.y = element_text(size = 14),
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    legend.position = "none") +
-  xlab("Evolved lines")+
-  ylab("Non-coding windows with normalized read counts (TPM) > 5")
+    axis.title.x = element_text(size = 18),
+    axis.title.y = element_text(size = 18),
+    axis.text.x = element_text(size = 16,angle=45,margin=margin(t = 25, r = 0, b = 0, l = 0)),
+    axis.text.y = element_text(size = 16),
+    axis.ticks.length=unit(.2, "cm"),
+    legend.position = "none",
+    #axis.line = element_line(),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
+  xlab("Lines")+
+  ylab("Non-coding windows with TPM > 5")
   
 #timeseries
 
