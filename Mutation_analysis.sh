@@ -105,3 +105,10 @@ rm *.sh
 
 cat *.gtf | sort -k4,4n | less
 
+####Step-2(a): Convert the .gtf files to .faa files using gffread####
+
+ls *.gtf | cut -f 1-3 -d '_' > filenames
+sed "s/^/..\/..\/..\/..\/..\/RNAseq_denovo\/tools\/gffread-0.12.7.Linux_x86_64\/gffread \-E \-w /g" filenames | sed "s/$/_mutation_adj_regions.faa \-g ..\/..\/..\/all_genomes\/REL606.fasta/g" | awk -F ' ' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$4}' | sed "s/$/t/g" | sed "s/_mutation_adj_regions.faat/.fasta/g" | sed "s/genomes\/ /genomes\//g" | awk -F ' ' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$4}' | sed "s/$/t/g" | sed "s/.faat/.gtf/g" | bash
+
+#############NEXT TIME: STEP 2B ONWARDS!!!################
+
