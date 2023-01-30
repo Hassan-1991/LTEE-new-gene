@@ -31,9 +31,10 @@ bash final_code.sh
 
 #Step-4: Intersect between the two gtf files to determine the mutated motifs
 
-bedtools intersect -a ../step2_gmapping_to_evolved/something*offset.gtf -b ../step3_appliedgd_to_appliedgtf/something_applied.gtf > something_mutated_motifs.gtf
+bedtools intersect -a ../step2_gmapping_to_evolved/something*offset.gtf -b ../step3_appliedgd_to_appliedgtf/something_applied.gtf -wa > something_mutated_motifs.gtf
 
 sed "s/^/sed \"s\/something\//g" somethings | sed "s/$/\/g\" basic_code_intersect.sh >> final_code_intersect.sh/g" > interim_code_intersect.sh
 bash interim_code_intersect.sh
 bash final_code_intersect.sh
 
+###########RETHINK THIS APPROACH###############
