@@ -1,3 +1,58 @@
+#Step-1: Predict both intrinsic and rho-dependent terminators in ancestral LTEE genome.
+#For Rho-dependent, use the RhoTermPredict.py script found here - https://github.com/MarcoDiSalvo90/RhoTermPredict/blob/master/RhoTermPredict_algorithm.py
+
+python3 RhoTermPredict_algorithm.py
+
+#Input genome name when prompted.
+#For intrinsic, use ARNold web server:
+
+http://rssf.i2bc.paris-saclay.fr/toolbox/arnold/
+
+#Step-2: Convert these raw files into gtfs:
+
+#ARNold:
+
+tail -n+2 Arnold_rawoutput_REL606.txt | 
+sed "s/ Rnamotif //g" | 
+sed "s/ Both //g" | 
+sed "s/ Erpin //g" | 
+rev | 
+cut -f 2- -d " " | 
+rev | 
+awk '{OFS=""}{print "REL606\t.\tCDS\t",$1,"\t",$1+length($3),"\t",$2}' | 
+cat -n | 
+sed "s/ REL606/\tREL606/g" | 
+awk '{OFS=""}{print $2,"\t",$3,"\t",$4,"\t",$5,"\t",$6,"\t",".\t",$7,"\t.\tgene_id \"Intrinsic_",$1,"\";transcript_id \"Intrinsic_",$1}' | 
+sed "s/$/\";/g" > ARNold_REL606.gtf
+
+#RhoTermPredict:
+#This csv file has a weird ^M character after "plus"/"minus" that's apparently impossible to get rid of, even with sed shenanigans
+#Just making the gtf without it, then adding a separate column with + and -
+
+tail -n+2 predictions_coordinates_REL606.csv | 
+sed "s/^/Rhodep_/g" | 
+sed "s/\tplus/\t+/g" | 
+sed "s/\tminus/\t-/g" | 
+awk -F '\t' '{OFS=FS}{print "REL606\t.\tCDS",$2,$3,".\t.",$1}' | 
+awk -F '\t' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$7,"gene_id \"",$8,"\";transcript_id \"",$8,"\";"}' | 
+sed "s/\tRho/Rho/g" | 
+sed "s/\t\";/\";/g" > interim
+
+tail -n+2 predictions_coordinates_REL606.csv | 
+grep "minus" | 
+sed "s/^/-\t/g" | 
+cut -f 1 >> interim_2
+
+paste interim interim_2 | 
+awk -F '\t' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$9,$7,$8}' | 
+sed "s/_T/_/g" > RhoTerm_REL606.gtf
+
+rm interim*
+
+#Cat 'em together and sort by start coordinates
+
+cat ARNold_REL606.gtf RhoTerm_REL606.gtf | sort -t '        ' -nk 4 > REL606_transterm_motifs.gtf
+
 #Step-2 (post-gmapping):
 
 #Identify bad maps, multiple maps, and deletions for each evolved genome. Convert remainder to gtf
