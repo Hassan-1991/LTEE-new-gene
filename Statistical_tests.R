@@ -115,3 +115,20 @@ ggplot(test1 %>% filter(type=="unannotated"), aes(x=evostat,y=tpm)) + geom_boxpl
 ggplot(test1 %>% filter(type=="annotated") %>% filter(line=="REL606"|line=="REL607"|line=="AraP5"), aes(x=evostat,y=tpm)) + geom_boxplot() + stat_compare_means(method = "t.test")
 ggplot(test1 %>% filter(type!="annotated") %>% filter(line=="REL606"|line=="REL607"|line=="AraP5"), aes(x=evostat,y=tpm)) + geom_boxplot() + stat_compare_means(method = "t.test")
 
+####This analysis is ideally done in the time series plus 50K dataset.
+#However, the ancestral normalized counts are very different between the two datasets.
+#I want to do some dimensionality plots with the data to make sure there are no bad samples.
+
+grep "rna" htseq_50000gen_400bp_count.csv | awk -F ',' '{OFS=""}{print $3,"_",$1",",$4,",",$5}' > htseq_50000gen_400bp_count_interim.csv
+awk -F ',' '{OFS=""}{print $2,"_",$3",",$4,",",$5}' htseq_time_series_400bp_namesorted_count.csv | tail -n+2  > htseq_time_series_400bp_namesorted_count_interim.csv
+cat htseq_50000gen_400bp_count_interim.csv htseq_time_series_400bp_namesorted_count_interim.csv | sed -z "1s/^/sample,gene_id,est_counts\n/g" > RNA_wholedataset_counts.csv
+
+#Convert to countmatrix:
+
+RNA_counts <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step4_csvmarking/RNA_wholedataset_counts.csv")
+
+RNA_counts_matrix <- RNA_counts %>% 
+  pivot_wider(names_from = sample, values_from = est_counts)
+
+#Made the coldata file manually
+
