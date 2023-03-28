@@ -45,7 +45,10 @@ for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do a
 cat Ara*common*gtf | cut -f 2 -d "\"" | s-u | sed "s/^/\"/g" | sed "s/$/\"/g" > all_common_ORFs.txt
 grep -f all_common_ORFs.txt REL606_allORFs_thirdstep.gtf > REL606_commonORFs.gtf
 
-#NEXT STEP: htseq
+#Add in annotated genes to each file, make the columns consistent
 
+for i in REL606 Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do grep -f common_annotated_genes.txt "$i"*insremoved.gtf | sort -t '  ' -nk 4 | awk -F '\t' '{OFS=FS}{print $1,$2=".",$3="CDS",$4,$5,$6,$7,$8=".",$9}' > "$i"_ORFs_featurelist.gtf; done
+for i in REL606 Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do cat "$i"*commonORFs.gtf | sort -t ' ' -nk 4 | awk -F '\t' '{OFS=FS}{print $1,$2=".",$3="CDS",$4,$5,$6,$7,$8=".",$9}' > "$i"_ORFs_featurelist.gtf; done
 
+#HTSeq, use skeletal code from windows
 
