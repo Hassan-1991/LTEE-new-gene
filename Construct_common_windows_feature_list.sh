@@ -19,6 +19,10 @@ gffread -E -w REL606_slidwindow400_CDS.faa -g REL606.fasta REL606_slidwindow400.
 
 -------------
 
+#gmap indices, skeleton code:
+
+../../../../../RNAseq_denovo/tools/gmap-2021-05-27/bin/gmap_build -d REL606 REL606.fasta .
+
 #Map to evolved genomes (indices should be in the same folder)
 
 echo 'gmap -D . -d SOMETHING -f 2 --gff3-fasta-annotation=1 REL606_slidwindow400_CDS.faa > SOMETHING_slidwindow400_CDS.gff3' > basic_code_400.sh 
