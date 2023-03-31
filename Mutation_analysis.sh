@@ -110,5 +110,27 @@ cat *.gtf | sort -k4,4n | less
 ls *.gtf | cut -f 1-3 -d '_' > filenames
 sed "s/^/..\/..\/..\/..\/..\/RNAseq_denovo\/tools\/gffread-0.12.7.Linux_x86_64\/gffread \-E \-w /g" filenames | sed "s/$/_mutation_adj_regions.faa \-g ..\/..\/..\/all_genomes\/REL606.fasta/g" | awk -F ' ' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$4}' | sed "s/$/t/g" | sed "s/_mutation_adj_regions.faat/.fasta/g" | sed "s/genomes\/ /genomes\//g" | awk -F ' ' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$4}' | sed "s/$/t/g" | sed "s/.faat/.gtf/g" | bash
 
-#############NEXT TIME: STEP 2B ONWARDS!!!################
+####Step-2(b) map these to evolved populations and make gtf files unique to each population####
 
+#gmap code to map these sequences to their evolved counterparts. Must be run in a directory that already has the indices
+
+for i in Ara+1_50000gen_11392 Ara+2_50000gen_11342 Ara+3_50000gen_11345 Ara+4_50000gen_11348 Ara+5_50000gen_11367 Ara-1_50000gen_11330 Ara-2_50000gen_11333 Ara-3_50000gen_11364 Ara-4_50000gen_11336 Ara-5_50000gen_11339 Ara-6_50000gen_11389; do gmap -D . -d "$i" -f 2 --gff3-fasta-annotation=1 "$i"_mutation_adj_regions.faa > "$i"_mutation_adj_regions.gff3; done
+
+#Get rid of all cases where a sequence maps more than once. Skeletal code:
+
+grep "mRNA" SOMETHING_mutation_adj_regions.gff3 | grep "path2" | cut -f 1 -d ';' | cut -f 9 | sed "s/ID=//g" | sed "s/.mrna2//g" > SOMETHING_duplicates.txt
+grep -v -f SOMETHING_duplicates.txt SOMETHING_mutation_adj_regions.gff3 | grep "path1" | grep "mRNA" | sed "s/mRNA/CDS/g" | sed "s/ID=/transcript_id \"/g" | sed "s/.mrna1;Name=/\";gene_id \"/g" | sed "s/;Parent/\";Parent/g"| cut -f 1,2 -d ";" | sed "s/$/;/g" > SOMETHING_mutation_adj_regions.gtf
+
+#Add in upstream control strands for each case:
+
+for i in Ara+1_50000gen_11392 Ara+2_50000gen_11342 Ara+3_50000gen_11345 Ara+4_50000gen_11348 Ara+5_50000gen_11367 Ara-1_50000gen_11330 Ara-2_50000gen_11333 Ara-3_50000gen_11364 Ara-4_50000gen_11336 Ara-5_50000gen_11339 Ara-6_50000gen_11389; do
+sed "s/+/%/g" ../step3_gmapgff3_to_gtf/"$i"_mutation_adj_regions.gtf | sed "s/\t-\t/\t+\t/g" | sed "s/%/-/g" | sed "s/id \"/id \"control_/g" >> "$i"_mutation_adj_regions.gtf
+
+For some reason, these doubled the control number - so just sort -u all files.
+
+time htseq-count -f bam -a 0 -t CDS --nonunique all ../../../../50k_bowti
+e_indices_bamfiles/rep1-rna-amAraM3 Ara-3_50000gen_11364_33K_mutation_fixed.gtf | head -n -5 | sed "s/^/gen50000,11364,BiolRep1,/g" | sed "s//,/g" >> htseq_33k_count.csv
+time htseq-count -f bam -a 0 -t CDS --nonunique all ../../../../50k_bowti
+e_indices_bamfiles/rep1-rna-amAraM3 Ara-3_50000gen_11364_33K_mutation_fixed.gtf | head -n -5 | sed "s/^/gen50000,11364,BiolRep1,/g" | sed "s//,/g" >> htseq_33k_count.csv
+
+for file in *.gtf; do sort -u -o $file $file; done
