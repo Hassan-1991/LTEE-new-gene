@@ -1,13 +1,15 @@
-####Step-1: Make individualized GTF files for each generation, containing 500bp plus_down and minus_up####
+#This code describes how transcriptomes were constructed containing mutation-adjacent regions for each evolved genome
+
+#Prepare the gdfiles, which contain mutation information for each evolved genome, for subsequent analysis
 
 ls *.gd > filenames
-sed "s/^/cat /g" filenames | sed "s/$/ \| grep \-v \"\#\" \| cut \-f 1,5,6,7 \> /g" | 
-awk -F ' ' '{OFS=FS}{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$2}' | 
+sed "s/^/cat /g" filenames | sed "s/$/ \| grep \-v \"\#\" \| cut \-f 1,5-7 \> /g" | 
+awk '{OFS=FS}{print $0,$2}' | 
 sed "s/$/t/g" | 
 sed "s/.gdt/_mutations.tsv/g" |
 bash
 
-#nano the following (marked with double ##s) into a file called basic_code.sh:
+#Copy-paste the following into a file called basic_code.sh:
 
 ##
 
