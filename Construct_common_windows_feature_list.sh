@@ -1,74 +1,50 @@
-#get genome length first
+#This code describes how to make the transcriptome comprised of 400-bp windows
+
+#Step-1: Make an initial file with all 400-bp windows in the genome
 
 awk '!/^>/ { printf "%s", $0; n="\n"} /^>/ {print n $0; n = "" } END {printf "%s", n }' REL606.fasta | grep -v "^>" | wc
 
-#The second number below is the size of the sliding window
-#The third number is genome length, extracted from the first step
+#The value this returns is 4629813. We use this and the window size, 400, to write the next piece of code
+#Construct a gtf file with all 400-bp windows across both strands of the genome
+#Get the corresponding sequences
 
-seq 1 400 4629813 > col1
-seq 1 400 4629813 | tail -n+2 > col2
-paste col1 col2 | cat -n | sed "s/ //g" | awk -F '\t' '{OFS=FS}{print "REL606\t.\tCDS",$2,$3-1,".\t+\t0\tgene_id \"window_plus_",$1,"\";transcript_id \"window_plus_",$1,"\";"}' | head -n-1 | sed "s/_\t/_/g" | sed "s/\t\"/\"/g" > REL606_slidwindow400.gtf
-paste col1 col2 | cat -n | sed "s/ //g" | awk -F '\t' '{OFS=FS}{print "REL606\t.\tCDS",$2,$3-1,".\t-\t0\tgene_id \"window_minus_",$1,"\";transcript_id \"window_minus_",$1,"\";"}' | head -n-1 | sed "s/_\t/_/g" | sed "s/\t\"/\"/g" >> REL606_slidwindow400.gtf
-rm col*
+seq 1 400 4629813 > col1 #Start coordinate of each window
+seq 1 400 4629813 | tail -n+2 > col2 #Stop coordinate of each window
+paste col1 col2 | cat -n | sed "s/ //g" | awk -F '\t' '{OFS=FS}{print "REL606\t.\tCDS",$2,$3-1,".\t+\t0\tgene_id \"window_plus_",$1,"\";transcript_id \"window_plus_",$1,"\";"}' | head -n-1 | sed "s/_\t/_/g" | sed "s/\t\"/\"/g" > REL606_slidwindow400.gtf #Windows on plus strand
+paste col1 col2 | cat -n | sed "s/ //g" | awk -F '\t' '{OFS=FS}{print "REL606\t.\tCDS",$2,$3-1,".\t-\t0\tgene_id \"window_minus_",$1,"\";transcript_id \"window_minus_",$1,"\";"}' | head -n-1 | sed "s/_\t/_/g" | sed "s/\t\"/\"/g" >> REL606_slidwindow400.gtf #Windows on minus strand
+rm col* #remove intermediate files
+gffread -E -w REL606_slidwindow400_CDS.faa -g REL606.fasta REL606_slidwindow400.gtf #get their sequences
 
-#Use this gtf file to extract corresponding sequences from the genome
+#Step-2: From this file, get rid of all windows that map more than once in any genome, experienced insertions or deletions, diverged substantially, or got deleted from any evolved genome
 
-gffread -E -w REL606_slidwindow400_CDS.faa -g REL606.fasta REL606_slidwindow400.gtf
+#We first map the window sequences to each evolved genome with gmap
 
-#Generate gmap indices for each line to which these sequences will be mapped
-
--------------
-
-#gmap indices, skeleton code:
-
-../../../../../RNAseq_denovo/tools/gmap-2021-05-27/bin/gmap_build -d REL606 REL606.fasta .
-
-#Map to evolved genomes (indices should be in the same folder)
-
-echo 'gmap -D . -d SOMETHING -f 2 --gff3-fasta-annotation=1 REL606_slidwindow400_CDS.faa > SOMETHING_slidwindow400_CDS.gff3' > basic_code_400.sh 
-ls -d Ara* | grep -v "gff3" > SOMETHINGS 
-sed "s/^/sed \"s\/SOMETHING\//g" SOMETHINGS | sed "s/$/\/g\" basic_code_400.sh >> final_code_400.sh/g" > interim_code_400.sh 
-bash interim_code_400.sh 
-bash final_code_400.sh
-
-#This returns a bunch of gff3 files. Only keep the windows that are common and map well to all lines and strains.
-#Get rid of all sequences that map more than once in any of the evolved genomes - they are duplicates
-#Also get rid of sequences that show an extended or truncated map in the evolved genomes, these are either spurious maps or includes insertion sequences
-
-echo 'grep "mRNA" SOMETHING_slidwindow400_CDS.gff3 | grep "path2" | cut -f 2 -d '=' | cut -f 1 -d '.' | sed "s/^/=/g" | sed "s/$/;/g" > SOMETHING_400_doublemaps 
-grep -v -f SOMETHING_400_doublemaps SOMETHING_slidwindow400_CDS.gff3 | grep "mRNA" > SOMETHING_400_step1 
-awk -F '\t' '(($5-$4>410)||($5-$4<390))' SOMETHING_400_step1 > SOMETHING_400_longshortmaps 
-grep -v -f SOMETHING_400_longshortmaps SOMETHING_400_step1 > SOMETHING_400_step2' > basic_code.sh
-sed "s/^/sed \"s\/SOMETHING\//g" SOMETHINGS | sed "s/$/\/g\" basic_code.sh >> final_code.sh/g" > interim_code.sh 
-bash interim_code.sh 
-bash final_code.sh 
-rm *longshortmaps 
-rm *doublemaps 
+for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6;
+do gmap_build -D . -d "$i" "$i".faa #build gmap indices for each evolved genome
+gmap -D . -d "$i" -f 2 --gff3-fasta-annotation=1 REL606_slidwindow400_CDS.faa > "$i"_slidwindow400_CDS.gff3 #map to evolved genomes
+grep "mRNA" "$i"_slidwindow400_CDS.gff3 | grep "path2" | cut -f 2 -d '=' | cut -f 1 -d '.' | sed "s/^/=/g" | sed "s/$/;/g" > "$i"_400_doublemaps #identify all windows that map more than once in any evolved genome
+grep -v -f "$i"_400_doublemaps "$i"_slidwindow400_CDS.gff3 | grep "mRNA" > "$i"_400_step1 #subtract "doublemaps"
+awk -F '\t' '(($5-$4>410)||($5-$4<390))' "$i"_400_step1 > "$i"_400_longshortmaps #identify the windows that map with a length +/-10bp
+grep -v -f "$i"_400_longshortmaps "$i"_400_step1 > "$i"_400_step2; done #Subtract "longshortmaps"
+rm *longshortmaps
+rm *doublemaps #Remove interim files
 
 #check to see if the remaining "common sequences" map with a suspiciously low identity or query cover by scanning their ID and qCov values: 
 
-cat *step2 | grep "mRNA" | grep "path1" | sed "s/=/;/g" | cut -f 12-15 -d ';' | sort -u | sort -t ';' -nk 2 | less 
+cat *step2 | grep "mRNA" | grep "path1" | sed "s/=/;/g" | cut -f 12-15 -d ';' | sort -u | sort -t ';' -nk 2 | less
 #lowest coverage - 98 for 400
 #lowest identity - 78.1
-#the remanining maps look file
 
-#Finally, get a set of windows that mapped to all strains, and weren't deleted in any of them. This represents the set of "common windows" we'll be using for analysis
+#These values are not very low, so we don't need to subtract anything.
 
-cat Ara*400*step2 | cut -f 2,9 | cut -f 1 -d ';' | sed "s/.mrna1//g" | sed "s/ID=//g" | cut -f 2 | sort | uniq -c | sed "s/ //g" | grep "25window" | sed "s/25window/window/g" | sed "s/^/=/g" | sed "s/$/;/g" > common_400bp_windows.txt 
+#From this set, pick out the windows that appear 11 times - meaning they haven't been deleted from any of the evolved genomes
 
-#The "25" number above in the previous line specifies - only select those that appear 25 times (for all 25 strains) in the record.
+cat Ara*400*step2 | cut -f 2,9 | cut -f 1 -d ';' | sed "s/.mrna1//g" | sed "s/ID=//g" | cut -f 2 | sort | uniq -c | sed "s/ //g" | grep "11window" | sed "s/11window/window/g" | sed "s/^/=/g" | sed "s/$/;/g" > common_400bp_windows.txt
 
-echo 'grep -f common_400bp_windows.txt SOMETHING_400_step2 > SOMETHING_400_commonwindows.gff3' > basic_code.sh 
-sed "s/^/sed \"s\/SOMETHING\//g" SOMETHINGS | sed "s/$/\/g\" basic_code.sh >> final_code.sh/g" > interim_code.sh 
-bash interim_code.sh 
-bash final_code.sh 
+#Extract these windows from the gff3s constructed earlier, convert them into gtfs
 
-#Now to convert these gff3 files into gtfs 
-
-echo 'grep "mRNA" SOMETHING_400_commonwindows.gff3 | sed "s/ID=/transcript_id=\"/g" | sed "s/.mrna1;Name=/\";gene_id \"/g" | sed "s/;Parent/\";Parent/g" | sed "s/\tmRNA\t/\tCDS\t/g" | awk -F '\t' '{OFS=FS}{print $1,$2=".",$3,$4,$5,$6,$7,$8,$9}' > SOMETHING_400_commonwindows.gtf' > basic_code.sh
-sed "s/^/sed \"s\/SOMETHING\//g" SOMETHINGS | sed "s/$/\/g\" basic_code.sh >> final_code.sh/g" > interim_code.sh 
-bash interim_code.sh 
-bash final_code.sh 
+for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6;
+do grep -f common_400bp_windows.txt "$i"_400_step2grep "mRNA" "$i"_400_commonwindows.gff3 | sed "s/ID=/transcript_id=\"/g" | sed "s/.mrna1;Name=/\";gene_id \"/g" | sed "s/;Parent/\";Parent/g" | sed "s/\tmRNA\t/\tCDS\t/g" | awk -F '\t' '{OFS=FS}{print $1,$2=".",$3,$4,$5,$6,$7,$8,$9}' > "$i"_400_commonwindows.gtf; done
 
 #Generate the feature lists for two ancestors manually
 
