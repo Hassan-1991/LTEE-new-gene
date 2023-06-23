@@ -1,3 +1,5 @@
+#Construct ancestral transcriptomes using .gd (not applied.gd) files, as the latter refer to evolved coordinates and are therefore useless.
+
 #For 500:
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do
