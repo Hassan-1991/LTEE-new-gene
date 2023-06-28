@@ -116,3 +116,31 @@ done
 
 cat *gff3 | grep "mrna2" | cut -f 2- -d '=' | cut -f 1 -d '.' | sort -u > duplicates
 
+#For each of these cases except MOBs, extract the mutated base(s) and +/-100bp
+
+#For each mutation, find out whether it's plus_down or minus_up.
+#If plus_down, get the +/-100 region the same way we got the +/-500 for gtf
+
+Ara+1_57_DEL_2086923_6104_minus_up_500
+
+for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do sed "s/^/$i\t/g" "$i"*_50000gen_[0-9][0-9][0-9][0-9][0-9].gd | sed 's/\t/_/1; s/\t/_/1' | sed "s/\t\./_\./g" | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"\t";print}' | grep "_\."; done > ANC_gdfiles_modded
+for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do sed "s/^/$i\t/g" "$i"*50000*applied*gd | sed 's/\t/_/1; s/\t/_/1' | sed "s/\t\./_\./g" | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"\t";print}' | grep "_\."; done > EVO_gdfiles_modded
+grep "plus" upregs | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"_"}' > upregs_mod_plus_down
+grep "minus" upregs | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"_"}' > upregs_mod_minus_up
+
+#Plus_down for ancestor, SNP/INS/MOB:
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "SNP|INS|MOB" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #make gtf, + strand
+
+#Plus_down for ancestor, AMP/CON/SUB/DEL:
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "DEL|CON|SUB|AMP" | awk -F '\t' '{OFS=FS}{print $1,$3+$4-100,$3+$4+100}' #ye
+
+Minus_up for ancestor, SNP/INS/MOB:
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "SNP|INS|MOB" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #minus strand
+
+Minus_up for ancestor, AMP/CON/SUB/DEL:
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "DEL|CON|SUB|AMP" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #minus strand
+
+#For evolved:
+
+#Ideally in the form of paired sequences. Each file marked with the mutation name, top one anc, bottom one evo.
+#Feed em thru salis lab.
