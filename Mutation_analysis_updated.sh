@@ -31,8 +31,8 @@ paste "$i"_ancestor_htseqready.gtf "$i"_evolved_temp.gtf | awk -F '\t' '{OFS=FS}
 done
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do
-ls ../../../50k_bowtie_indices_bamfiles/*sorted.bam | egrep "REL60" | sed "s/^/time htseq-count -f bam -a 0 -t CDS --nonunique all /g" | awk -v var="$i" '{OFS=""}{print $0," ",var,"_ancestor_htseqready.gtf \| head -n -5 \> T",$11}' | sed "s/T..\/..\/..\/50k_bowtie_indices_bamfiles\///g" | sed "s/$/t/g" | sed "s/_sorted.bamt//g" | awk -v var=$i '{OFS=""}{print $0,"_",var}' > "$i"_htseq_500.sh
-ls ../../../50k_bowtie_indices_bamfiles/*sorted.bam | grep "$i" | sed "s/^/time htseq-count -f bam -a 0 -t CDS --nonunique all /g" | awk -v var="$i" '{OFS=""}{print $0," ",var,"_evolved_htseqready.gtf \| head -n -5 \> T",$11}' | sed "s/T..\/..\/..\/50k_bowtie_indices_bamfiles\///g" | sed "s/$/t/g" | sed "s/_sorted.bamt//g" | awk -v var=$i '{OFS=""}{print $0,"_",var}' >> "$i"_htseq_500.sh
+ls ../../../../50k_bowtie_indices_bamfiles/*sorted.bam | egrep "REL60" | sed "s/^/time htseq-count -f bam -a 0 -t CDS --nonunique all /g" | awk -v var="$i" '{OFS=""}{print $0," ",var,"_ancestor_htseqready.gtf \| head -n -5 \> T",$11}' | sed "s/T..\/..\/..\/..\/50k_bowtie_indices_bamfiles\///g" | sed "s/$/t/g" | sed "s/_sorted.bamt//g" | awk -v var=$i '{OFS=""}{print $0,"_",var}' > "$i"_htseq_500.sh
+ls ../../../../50k_bowtie_indices_bamfiles/*sorted.bam | grep "$i" | sed "s/^/time htseq-count -f bam -a 0 -t CDS --nonunique all /g" | awk -v var="$i" '{OFS=""}{print $0," ",var,"_evolved_htseqready.gtf \| head -n -5 \> T",$11}' | sed "s/T..\/..\/..\/..\/50k_bowtie_indices_bamfiles\///g" | sed "s/$/t/g" | sed "s/_sorted.bamt//g" | awk -v var=$i '{OFS=""}{print $0,"_",var}' >> "$i"_htseq_500.sh
 done
 
 ls rep* | awk '{OFS=""}{print $1,"_",$1}' | awk -F '_' '{OFS=""}{print "sed -i \"s\/^\/",$1,"\\t/g\" ",$3,"_",$4}' | bash
@@ -52,62 +52,67 @@ library(DESeq2)
 library(matrixStats)
 library(apeglm)
 
-kdf2 <- read_tsv("Ara-6_500_htseq.tsv") %>% 
-  select(repl, seqtype, line, target_id, est_counts) %>% 
-  unite("sample", c(seqtype, line, repl), sep = "_")
-line.names <- unique(str_extract(unique(kdf2$sample),"[a-z]{3,4}_Ara[-+][1-6]"))
-line.names <- line.names[!is.na(line.names)]
-names(line.names) <- line.names
-wide.kdf2 <- kdf2 %>% 
-  pivot_wider(names_from = sample, values_from = est_counts)
-wide.kdf2 <- wide.kdf2 %>% rowwise %>% mutate(row.sum = sum(c_across(starts_with("rna")))) %>% filter(row.sum>5) %>% select(1:13)
-df.list <- lapply(line.names, function(x){
-  seqtype <- unlist(str_split(x, "_"))[1]
-  anc.to.pick <- paste(seqtype, "REL", sep = "_")
-  wide.kdf2 %>%
-    select(target_id, starts_with(x), starts_with(anc.to.pick)) %>% # pick the correct columns, one evo and both anc
-    mutate_if(is.double, as.integer) %>%                            # convert cols to integers
-    column_to_rownames("target_id") %>%                             # gene ids to rownames
-    as.matrix()                                                     # change to a matrix
-})
-(conds.df <- data.frame(condition = factor(c(rep("evo", 2), rep("anc", 4)), levels = c("anc", "evo"))))
+variable_names <- c("Ara+1", "Ara+2", "Ara+3", "Ara+4", "Ara+5", "Ara-1", "Ara-2", "Ara-3", "Ara-4", "Ara-5", "Ara-6")
 
-deseq.list2 <- lapply(df.list, function(x){
-  d1 <- DESeqDataSetFromMatrix(countData = x,
-                               colData = conds.df,
-                               design = ~condition)  
-  d2 <- DESeq(d1)
-  d3 <- lfcShrink(d2,
-                  coef = 2,
-                  type = "apeglm")
-  #d3 <- results(d2)
-  # return the results as a data frame with no rownames
-  d4 <- as_tibble(d3, rownames = "target_id")
-  return(d4)
-})
+for (variable in variable_names) {
+  kdf2 <- read_tsv(paste0(variable, "_500_htseq.tsv")) %>% 
+    select(repl, seqtype, line, target_id, est_counts) %>% 
+    unite("sample", c(seqtype, line, repl), sep = "_")
+  
+  line.names <- unique(str_extract(unique(kdf2$sample), "[a-z]{3,4}_[A-Za-z]+[-+][1-6]"))
+  line.names <- line.names[!is.na(line.names)]
+  names(line.names) <- line.names
+  
+  wide.kdf2 <- kdf2 %>% 
+    pivot_wider(names_from = sample, values_from = est_counts)
+  
+  wide.kdf2 <- wide.kdf2 %>% 
+    rowwise() %>% 
+    mutate(row.sum = sum(c_across(starts_with("rna")))) %>% 
+    filter(row.sum > 5) %>% 
+    select(1:13)
+  
+  df.list <- lapply(line.names, function(x) {
+    seqtype <- unlist(str_split(x, "_"))[1]
+    anc.to.pick <- paste(seqtype, "REL", sep = "_")
+    
+    wide.kdf2 %>%
+      select(target_id, starts_with(x), starts_with(anc.to.pick)) %>% 
+      mutate_if(is.double, as.integer) %>% 
+      column_to_rownames("target_id") %>% 
+      as.matrix()
+  })
+  
+  conds.df <- data.frame(condition = factor(c(rep("evo", 2), rep("anc", 4)), levels = c("anc", "evo")))
+  
+  deseq.list2 <- lapply(df.list, function(x) {
+    d1 <- DESeqDataSetFromMatrix(countData = x,
+                                 colData = conds.df,
+                                 design = ~condition)  
+    d2 <- DESeq(d1)
+    d3 <- lfcShrink(d2,
+                    coef = 2,
+                    type = "apeglm")
+    d4 <- as_tibble(d3, rownames = "target_id")
+    return(d4)
+  })
+  
+  deseq.df2 <- bind_rows(deseq.list2, .id ="sample") %>% 
+    separate(sample, into = c("seqtype", "line"), sep = "_")
+  
+  write_csv(deseq.df2, paste0(variable, "_deseq2_results.csv"))
+}
 
-deseq.df2 <- bind_rows(deseq.list2, .id ="sample") %>% 
-  separate(sample, into = c("seqtype", "line"), sep = "_")
-write_csv(deseq.df2, "Ara-6_deseq2_results.csv")
-
-cat Ara*deseq2*csv | awk -F ',' '($1=="rna"&&$8<0.05&&$5>0)' | grep -v "ECB_" | cut -f 3 -d ',' | sort -u > 366_upregs
+cat Ara*deseq2*csv | awk -F ',' '($1=="rna"&&$8<0.05&&$5>0)' | grep -v "ECB_" | cut -f 3 -d ',' | sort -u > upregs
 
 #BUILD GMAP
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6
 do
-cat *evolved*nongenic*gtf | grep -f 366_upregs | grep "$i" > "$i"_upreg.gtf
+cat *evolved*htseqread*gtf | grep -f upregs | grep "$i" > "$i"_upreg.gtf
 gffread -E -w "$i"_upreg.faa -g ../../all_genomes/"$i"*50000*fasta "$i"_upreg.gtf
 /stor/work/Ochman/hassan/tools/gmap-2021-05-27/bin/gmap -D . -d "$i" -f 2 --gff3-fasta-annotation=1 "$i"_upreg.faa > "$i"_upreg.gff3 #map to evolved genomes
 done
 
-#Even after getting rid of duplicates and cases that ahd >10 reads in ancestor, there are 262 cases of increase.
-#Of these, 249 had a log2fold change exceeding 2
-#What other filter could be used?
-#Replicate difference could be a huge issue
-#Readthrough
-#Promoter formation could be the major one
-#In my original paper I only found a very few cases of promoter formation or transfer
-#This could be a case where I can demonstrate this!
-#That's why this is promising
-#Do this with other length windows too and see what I get
+cat *gff3 | grep "mrna2" | cut -f 2- -d '=' | cut -f 1 -d '.' | sort -u > duplicates
+
