@@ -1,3 +1,10 @@
+#UPDATES:
+
+#Large scale: instead of using -s -v, get rid of those with more than say 15 bp of overlap. Otherwise a lot of Mob plus down are lost.
+#After extracting sequences (first step), align them to see how map. Sometimes the two sequences have nothing in common at all?
+#This will also check/verify the blast approach.
+#Afterwards, check promoters, rhoterm, arnold.
+
 #Construct ancestral transcriptomes using .gd (not applied.gd) files, as the latter refer to evolved coordinates and are therefore useless.
 
 #For 500:
