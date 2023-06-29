@@ -129,18 +129,24 @@ grep "plus" upregs | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"_"}' > upregs_
 grep "minus" upregs | awk -F '_' '{OFS=""}{print $1,"_",$3,"_",$2,"_"}' > upregs_mod_minus_up
 
 #Plus_down for ancestor, SNP/INS/MOB:
-grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "SNP|INS|MOB" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #make gtf, + strand
-
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "SNP|INS|MOB" | awk -F '\t' '{OFS=""}{print "REL606\t.\tCDS\t",$3-100,"\t",$3+100,"\t.\t+\t0\ttranscript_id \"",$1,"_plus_down_anc\";gene_id \"",$1,"_plus_down_anc\";"}' | sed "s/_\._/_/g" > test.gtf
 #Plus_down for ancestor, AMP/CON/SUB/DEL:
-grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "DEL|CON|SUB|AMP" | awk -F '\t' '{OFS=FS}{print $1,$3+$4-100,$3+$4+100}' #ye
-
-Minus_up for ancestor, SNP/INS/MOB:
-grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "SNP|INS|MOB" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #minus strand
-
-Minus_up for ancestor, AMP/CON/SUB/DEL:
-grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "DEL|CON|SUB|AMP" | awk -F '\t' '{OFS=FS}{print $1,$3-100,$3+100}' #minus strand
+grep -f upregs_mod_plus_down ANC_gdfiles_modded | egrep "DEL|CON|SUB|AMP" | awk -F '\t' '{OFS=""}{print "REL606\t.\tCDS\t",$3+$4-100,"\t",$3+$4+100,"\t.\t+\t0\ttranscript_id \"",$1,"_plus_down_anc\";gene_id \"",$1,"_plus_down_anc\";"}' | sed "s/_\._/_/g"  >> test.gtf
+#Minus_up for ancestor, all:
+grep -f upregs_mod_minus_up ANC_gdfiles_modded | awk -F '\t' '{OFS=""}{print "REL606\t.\tCDS\t",$3-100,"\t",$3+100,"\t.\t-\t0\ttranscript_id \"",$1,"_minus_up_anc\";gene_id \"",$1,"_minus_up_anc\";"}' | sed "s/_\._/_/g" >>  test.gtf
 
 #For evolved:
+
+grep -f upregs_mod_plus_down EVO_gdfiles_modded | sed "s/IS1\t-1/IS1_-1/g" | sed "s/IS1\t1/IS1_1/g" | sed "s/IS3\t-1/IS3_-1/g" | sed "s/IS3\t1/IS3_1/g" | sed "s/IS4\t-1/IS4_-1/g" | sed "s/IS4\t1/IS4_1/g" | sed "s/IS150\t-1/IS150_-1/g" | sed "s/IS150\t1/IS150_1/g" | sed "s/IS186\t-1/IS186_-1/g" | sed "s/IS186\t1/IS186_1/g" | awk '{ for (i=1; i<=NF; i++) { if (i == 1 || $i ~ /(applied_start=|applied_end=)/) printf "%s ", $i } printf "\n" }' | sed "s/applied_end=//g" | sed "s/applied_start=//g" | sed "s/ /\t/g" | awk -F '\t' '{OFS=""}{print "REL606\t.\tCDS\t",$2-100,"\t",$2+100,"\t.\t+\t0\ttranscript_id \"",$1,"_plus_down_evo\";gene_id \"",$1,"_plus_down_evo\";"}' | sed "s/_\._/_/g" >> test.gtf
+grep -f upregs_mod_minus_up EVO_gdfiles_modded | sed "s/IS1\t-1/IS1_-1/g" | sed "s/IS1\t1/IS1_1/g" | sed "s/IS3\t-1/IS3_-1/g" | sed "s/IS3\t1/IS3_1/g" | sed "s/IS4\t-1/IS4_-1/g" | sed "s/IS4\t1/IS4_1/g" | sed "s/IS150\t-1/IS150_-1/g" | sed "s/IS150\t1/IS150_1/g" | sed "s/IS186\t-1/IS186_-1/g" | sed "s/IS186\t1/IS186_1/g" | awk '{ for (i=1; i<=NF; i++) { if (i == 1 || $i ~ /(applied_start=|applied_end=)/) printf "%s ", $i } printf "\n" }' | sed "s/applied_end=//g" | sed "s/applied_start=//g" | sed "s/ /\t/g" | awk -F '\t' '{OFS=""}{print "REL606\t.\tCDS\t",$3-100,"\t",$3+100,"\t.\t-\t0\ttranscript_id \"",$1,"_minus_up_evo\";gene_id \"",$1,"_minus_up_evo\";"}' | sed "s/_\._/_/g" >> test.gtf
+
+awk -F "\"" '{OFS=FS}{print $2,$1,$2,$3,$4,$5}' test.gtf | sed "s/\"REL606/_REL606/g" | grep "evo" | cut -f 1,7- -d "_" | sed "s/_REL606\t/\t/g" > test_modified.gtf
+awk -F "\"" '{OFS=FS}{print $2,$1,$2,$3,$4,$5}' test.gtf | sed "s/\"REL606/_REL606/g" | grep "evo" | cut -f 1,7- -d "_" | sed "s/_REL606\t/\t/g" >> test_modified.gtf
+
+for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do sed "s/>REL606/>"$i"/g" ../../all_genomes/"$i"*50000gen*fasta; done >> all_genomes_modded.fasta
+cat ../../all_genomes/REL606.fasta >> all_genomes_modded.fasta
+
+gffread -E -w test_modified.faa -g all_genomes_modded.fasta test_modified.gtf
 
 #Ideally in the form of paired sequences. Each file marked with the mutation name, top one anc, bottom one evo.
 #Feed em thru salis lab.
