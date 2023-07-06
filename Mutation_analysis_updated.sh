@@ -21,7 +21,7 @@ done
 #manually check to make sure no bad records
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do
-bedtools intersect -s -a "$i"_evolved.gtf -b ../../../converted_gtf_files/"$i"_50000gen*gtf -wo | awk -F '\t' '($19>10)' | cut -f 2 -d "\"" > "$i"_genic_windows.txt
+bedtools intersect -s -a "$i"_evolved.gtf -b ../../../converted_gtf_files/"$i"_50000gen*gtf -wo | awk -F '\t' '(($12=="CDS"||$12=="gene"||$12=="repeat_region"||$12~"RNA"||$12~"fCDS")&&($19>10))' | cut -f 2 -d "\"" > "$i"_genic_windows.txt
 grep -v -f "$i"_genic_windows.txt "$i"_evolved.gtf > "$i"_evolved_nongenic.gtf
 grep -v -f "$i"_genic_windows.txt "$i"_ancestor.gtf > "$i"_ancestor_nongenic.gtf
 done
@@ -117,12 +117,14 @@ cat Ara*deseq2*csv | awk -F ',' '($1=="rna"&&$8<0.05&&$5>0)' | grep -v "ECB_" | 
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6
 do
-cat *evolved*htseqread*gtf | grep -f upregs | grep "$i" > "$i"_upreg.gtf
+cat 100bp/*evolved*htseqread*gtf 200bp/*evolved*htseqread*gtf | grep -f upregs | grep "$i" > "$i"_upreg.gtf
 gffread -E -w "$i"_upreg.faa -g ../../all_genomes/"$i"*50000*fasta "$i"_upreg.gtf
 /stor/work/Ochman/hassan/tools/gmap-2021-05-27/bin/gmap -D . -d "$i" -f 2 --gff3-fasta-annotation=1 "$i"_upreg.faa > "$i"_upreg.gff3 #map to evolved genomes
 done
 
 cat *gff3 | grep "mrna2" | cut -f 2- -d '=' | cut -f 1 -d '.' | sort -u > duplicates
+
+
 
 #For each of these cases except MOBs, extract the mutated base(s) and +/-100bp
 
