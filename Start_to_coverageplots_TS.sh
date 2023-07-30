@@ -74,3 +74,4 @@ ls REL606*BiolRep*tsv | cut -f 1-4 -d "_" | awk -F '_' '{OFS=""}{print "sed -i \
 
 cat 100bp_timeseries/TIMESERIES_deseq2_results.csv 200bp_timeseries/TIMESERIES_deseq2_results.csv | awk -F ',' '($8<0.05&&$5>0&&$3!~"ECB")' | cut -f 3 -d ',' | sort -u > 12_increases.txt
 
+#Do gmapping and manual scanning to get rid of the 2 extras
