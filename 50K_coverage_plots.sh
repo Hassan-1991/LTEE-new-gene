@@ -140,6 +140,7 @@ title <- X
 
 # Arrange the plots into a 2x2 grid
 collage <- grid.arrange(plot1, plot2, plot3, plot4, ncol = 2, top = title)
+ggsave(paste0(X, ".png"), collage, width = 10, height = 8, units = "in")
 
 # Display the collage
 print(collage)
