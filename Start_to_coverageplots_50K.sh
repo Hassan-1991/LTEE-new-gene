@@ -148,5 +148,6 @@ for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do s
 cat 100bp/*evolved*htseqread*gtf 200bp/*evolved*htseqread*gtf | grep -f upregs | gtf2bed | awk '{OFS=""}{print $4,"_",$0}' | cut -f 1,7- -d "_" | sed "s/_REL606\t/\t/g" | sort -nk 4 | bedtools intersect -wo -a - -b all_repeat_regions.gtf | awk -F '\t' '($20>90)' | cut -f 2 -d "\"" | rev | cut -f 2- -d "_" | rev | sort -u >> duplicates
 
 grep -v -f duplicates upregs | rev | cut -f 3- -d "_" | sort -u | rev > 63_coverage_candidates.txt
+grep -v -f duplicates upregs | rev | cut -f 2- -d "_" | sort -u | rev > 63_coverage_candidates)_withoutstrand.txt
 
 #Make coverage plots from this point on.
