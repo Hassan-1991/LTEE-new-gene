@@ -72,5 +72,74 @@ done
 for i in $(grep "minus" ../63_coverage_candidates.txt | cut -f 1-3 -d "_"); do awk -i inplace '{OFS='\t'}{$6 = 200 - $6}1' "$i"*coverage*; done
 sed -i "1s/^/replicate\tseqtype\tline\tcount\tposition_abs\tposition\n/g" *coverage
 
-#Generating plots in R
+#R code to generate coverage plots
 
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(stringr)
+
+setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/all_coverages")
+
+X <- "Ara+5_30_MOB"  # Replace with the desired value of X
+
+p1 <- read.csv(paste0(X, "_coverage_ancestor_left"), sep = '\t')
+p2 <- read.csv(paste0(X, "_coverage_ancestor_right"), sep = '\t')
+p3 <- read.csv(paste0(X, "_coverage_left"), sep = '\t')
+p4 <- read.csv(paste0(X, "_coverage_right"), sep = '\t')
+
+# Function to create the plot
+get_average_sd <- function(data) {
+  averages <- data %>%
+    filter(seqtype == "rna") %>%
+    group_by(position) %>%
+    summarize(average = mean(count),
+              sd = sd(count),
+              n = n())
+  }
+  
+# Plot the average counts with error bars
+plot1 <- ggplot(get_average_sd(p1), aes(x = position, y = average)) +
+  geom_line(color = "darkviolet") +
+  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
+  labs(x = "Position", y = "Average Count", title ="Ancestor, upstream") +
+  ylim(0, 15) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+plot2 <- ggplot(get_average_sd(p2), aes(x = position, y = average)) +
+  geom_line(color = "darkviolet") +
+  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
+  labs(x = "Position", y = "Average Count", title ="Ancestor, downstream") +
+  ylim(0, 15) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+plot3 <- ggplot(get_average_sd(p3), aes(x = position, y = average)) +
+  geom_line(color = "darkorange1") +
+  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
+  labs(x = "Position", y = "Average Count", title ="Evolved, upstream") +
+  ylim(0, 15) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+plot4 <- ggplot(get_average_sd(p4), aes(x = position, y = average)) +
+  geom_line(color = "darkorange1") +
+  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
+  labs(x = "Position", y = "Average Count", title ="Evolved, downstream") +
+  ylim(0, 15) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+
+# Get the title from the file name
+title <- X
+
+# Arrange the plots into a 2x2 grid
+collage <- grid.arrange(plot1, plot2, plot3, plot4, ncol = 2, top = title)
+
+# Display the collage
+print(collage)
