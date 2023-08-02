@@ -38,8 +38,6 @@ cat *tpm.tsv | grep -f ../50K_unambiguous_protogenes.txt | sed "1s/^/target_id,s
 
 p3 <- read.csv("50K_protogenes_TPMs.csv")
 
-p3$tpmdiff <- p3$meantpm-p3$anctpm
-
 p3 <- p3 %>%
   mutate(mutation_type = case_when(
     grepl("MOB", target_id, ignore.case = TRUE) ~ "IS150",
@@ -75,9 +73,9 @@ p3 %>%
     panel.grid.minor = element_line(size = 0.5, linetype = 'dashed',colour = "gray"),
     legend.background = element_rect(fill='transparent'), #transparent legend bg
     legend.box.background = element_rect(fill='transparent'),
-    axis.title.x = element_text(size = 14),
-    axis.title.y = element_text(size = 14),
-    axis.text.x = element_text(angle = 90, hjust = 1),
+    axis.title.x = element_text(size = 18),
+    axis.title.y = element_text(size = 18),
+    axis.text.x = element_text(size=16, angle = 90, hjust = 1),
     axis.text.y = element_text(size = 16),
     legend.key.size = unit(1, 'cm'),
     legend.text = element_text(size=15),
