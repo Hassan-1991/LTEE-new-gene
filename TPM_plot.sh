@@ -52,6 +52,8 @@ p3 <- p3 %>%
 p3 <- p3 %>%
   mutate(tpmdiff = tpm_evolved - tpm_ancestor)
 
+p3$target_id <- sapply(str_split(p3$target_id, "_"), function(x) paste(x[1:3], collapse = "_"))
+
 p3 %>%
   mutate(target_id = fct_reorder(target_id, tpmdiff)) %>%
   ggplot(aes(x=target_id,y=tpm_ancestor, color=mutation_type)) +
