@@ -37,15 +37,15 @@ bedtools getfasta -fi ./REL606.fasta -s -name -bed 12_anc.bed > 12_anc.faa
 grep "something" 12_anc.bed > something.bed
 grep "something" *gff3 | grep "mRNA.*mrna1" | cut -f 2,4,5,7,9 | cut -f 1 -d '(' | sed "s/ID=//g" | awk -F '\t' '{OFS=FS}{print $1,$2,$3,$5,"0",$4}' >> something.bed
 
-X=$(grep "REL606.*down" something.bed | cut -f 2); Y=$(grep "REL606.*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*REL60* | sed "s/_Biol/\tBiol/g" > something_down_coverage_REL606
+X=$(grep "REL606.*down" something.bed | cut -f 3); Y=$(grep "REL606.*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*REL60* | sed "s/_Biol/\tBiol/g" > something_down_coverage_REL606
 X=$(grep "REL606.*up" something.bed | cut -f 2); Y=$(grep "REL606.*up" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*REL60*  | sed "s/_Biol/\tBiol/g" > something_up_coverage_REL606
 
 for i in Ara-3_5000gen_ZDB409 Ara-3_10000gen_ZDB425 Ara-3_15000gen_ZDB445 Ara-3_20000gen_ZDB467 Ara-3_25000gen_ZDB483 Ara-3_25000gen_ZDB486 Ara-3_25000gen_ZDB488 Ara-3_27000gen_ZDB309 Ara-3_30000gen_ZDB17 Ara-3_31500gen_ZDB199 Ara-3_31500gen_ZDB200 Ara-3_31500gen_ZDB25 Ara-3_31500gen_ZDB564 Ara-3_33000gen_CZB154
 do 
-X=$(grep ""$i".*down" something.bed | cut -f 2); Y=$(grep ""$i".*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*"$i"* | sed "s/_Biol/\tBiol/g" > something_down_coverage_"$i"
+X=$(grep ""$i".*down" something.bed | cut -f 3); Y=$(grep ""$i".*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*"$i"* | sed "s/_Biol/\tBiol/g" > something_down_coverage_"$i"
 X=$(grep ""$i".*up" something.bed | cut -f 2); Y=$(grep ""$i".*up" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$4>X && $4<X+200 && $6==Y { print $1 "\t" $2 "\t" $5 "\t" $4 "\t" $4-X}' ../coverage/timeseries/*"$i"*  | sed "s/_Biol/\tBiol/g" > something_minus_up_coverage_"$i"
 done
 
-X=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 2); Y=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' ../coverage/*rna*Ara-3* | sed "s/-rna-/\t/g" |  awk -F '\t' '{OFS=FS}{print $2,$1,$3,$4,$5}' > something_minus_down_coverage_Ara-3_50000gen_11364
+X=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 3); Y=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' ../coverage/*rna*Ara-3* | sed "s/-rna-/\t/g" |  awk -F '\t' '{OFS=FS}{print $2,$1,$3,$4,$5}' > something_minus_down_coverage_Ara-3_50000gen_11364
 X=$(grep "Ara-3_50000gen_11364.*up" something.bed | cut -f 2); Y=$(grep "Ara-3_50000gen_11364.*up" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' ../coverage/*rna*Ara-3* | sed "s/-rna-/\t/g" | awk -F '\t' '{OFS=FS}{print $2,$1,$3,$4,$5}' > something_minus_up_coverage_Ara-3_50000gen_11364
 
