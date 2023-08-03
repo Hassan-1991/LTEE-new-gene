@@ -36,10 +36,17 @@ bedtools genomecov -d -strand - -ibam "$i"*sorted.bam | sed "s/^/"$i"\t/g" | sed
 cat "$i"_plus "$i"_minus > "$i"_coverage.tsv
 done
 
-
-
 X=$(grep "something" ../70_bothdataset_upregs.bed | cut -f 3); Y=$(grep "something" ../70_bothdataset_upregs.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' *_coverage_.tsv >> something_right
 X=$(grep "something" ../70_bothdataset_upregs.bed | cut -f 2); Y=$(grep "something" ../70_bothdataset_upregs.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X-200 && $3<X && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' *_coverage_.tsv >> something_left
 
 #replace something with name of the genes
 
+#Screwed this up, need additional changes. For plus_left:
+
+awk -F '\t' '{OFS=FS}{$4=$4+200}1' Ara+5_30_MOB_left | sed "s/abs\t200/abs\tposition/g"
+
+#for minus_left:
+
+awk -F '\t' '{OFS=FS}{$4=$4-200}1' Ara-2_440_SNP_left | sed "s/abs\t-200/abs\tposition/g"
+
+#Generate coverage plots using R (TS_coverage_plots.sh)
