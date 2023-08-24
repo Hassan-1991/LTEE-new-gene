@@ -82,3 +82,5 @@ p3 %>%
     legend.key.size = unit(1, 'cm'),
     legend.text = element_text(size=15),
     legend.position="top")
+
+ggsave("100bp_TPMplot.pdf", device="pdf", width = 25, height = 12, units = "in")
