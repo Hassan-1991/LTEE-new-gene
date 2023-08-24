@@ -49,3 +49,52 @@ done
 X=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 3); Y=$(grep "Ara-3_50000gen_11364.*down" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' ../coverage/*rna*Ara-3* | sed "s/-rna-/\t/g" |  awk -F '\t' '{OFS=FS}{print $2,$1,$3,$4,$5}' > something_minus_down_coverage_Ara-3_50000gen_11364
 X=$(grep "Ara-3_50000gen_11364.*up" something.bed | cut -f 2); Y=$(grep "Ara-3_50000gen_11364.*up" something.bed | cut -f 6); awk -F '\t' -v X="$X" -v Y="$Y" '$3>X && $3<X+200 && $5==Y { print $1 "\t" $4 "\t" $3 "\t" $3-X}' ../coverage/*rna*Ara-3* | sed "s/-rna-/\t/g" | awk -F '\t' '{OFS=FS}{print $2,$1,$3,$4,$5}' > something_minus_up_coverage_Ara-3_50000gen_11364
 
+########R##########
+
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(stringr)
+
+setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/timeseries")
+
+#X <- "DEL_3015771_19352"  # Replace with the desired value of X
+X <- "MOB_4415710_IS150"  # Replace with the desired value of X
+#X <- "MOB_4110237_IS150"  # Replace with the desired value of X
+Y <- c("REL606","Ara-3_10000gen_ZDB425","Ara-3_20000gen_ZDB467","Ara-3_30000gen_ZDB17","Ara-3_33000gen_CZB154")
+
+plots_list <- list()
+
+for (value in Y) {
+  p1 <- read.csv(paste0(X, "_down_coverage_", value), sep = '\t')
+  
+  create_plot <- function(data) {
+    averages <- data %>%
+      group_by(position) %>%
+      summarize(average = mean(count),
+                sd = sd(count),
+                n = n())
+    
+    ggplot(averages, aes(x = position, y = average)) +
+      geom_line(color = "darkorange1") +
+      geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
+      labs(x = "Position", y = "Average Count") +
+      ylim(0, 50) +
+      theme_minimal() +
+      theme(panel.background = element_rect(fill = 'transparent'),
+            panel.grid.major = element_blank(),
+            legend.position = "none",
+            axis.title.x = element_text(size = 16),
+            axis.title.y = element_text(size = 16),
+            axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16))
+  }
+  
+  plot <- create_plot(p1)
+  plots_list[[value]] <- plot
+}
+
+collage <- grid.arrange(grobs = plots_list, ncol = 5, top = X)
+
+ggsave(paste0(X, "_collage.pdf"), collage, device="pdf", width = 30, height = 6, units = "in")
+print(collage)
