@@ -78,69 +78,83 @@ library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(stringr)
+library(grid)
 
 setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/all_coverages")
 
-X <- "Ara+5_30_MOB"  # Replace with the desired value of X
+values <- c(
+  "Ara+1_31_MOB",
+  "Ara+1_35_MOB",
+  "Ara+1_102_MOB",
+  "Ara+5_30_MOB",
+  "Ara-5_84_MOB",
+  "Ara-6_24_MOB")
 
-p1 <- read.csv(paste0(X, "_coverage_ancestor_left"), sep = '\t')
-p2 <- read.csv(paste0(X, "_coverage_ancestor_right"), sep = '\t')
-p3 <- read.csv(paste0(X, "_coverage_left"), sep = '\t')
-p4 <- read.csv(paste0(X, "_coverage_right"), sep = '\t')
-
-# Function to create the plot
-get_average_sd <- function(data) {
-  averages <- data %>%
-    filter(seqtype == "rna") %>%
-    group_by(position) %>%
-    summarize(average = mean(count),
-              sd = sd(count),
-              n = n())
-  }
+# Create a function to generate the plots
+generate_plots <- function(X) {
+  p1 <- read.csv(paste0(X, "_coverage_ancestor_left"), sep = '\t')
+  p2 <- read.csv(paste0(X, "_coverage_ancestor_right"), sep = '\t')
+  p3 <- read.csv(paste0(X, "_coverage_left"), sep = '\t')
+  p4 <- read.csv(paste0(X, "_coverage_right"), sep = '\t')
   
-# Plot the average counts with error bars
-plot1 <- ggplot(get_average_sd(p1), aes(x = position, y = average)) +
-  geom_line(color = "darkviolet") +
-  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
-  labs(x = "Position", y = "Average Count", title ="Ancestor, upstream") +
-  ylim(0, 15) +
-  theme_minimal() +
-  theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5))
+  plot1 <- ggplot(get_average_sd(p1), aes(x = position, y = average)) +
+    geom_line(color = "darkviolet") +
+    geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
+    labs(x = "Position", y = "Coverage (read count)", title ="Ancestor, upstream") +
+    #ylim(0, 15) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5, size=20),
+          axis.title.x = element_text(size = 16),
+          axis.title.y = element_text(size = 16),
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16))
+  
+  plot2 <- ggplot(get_average_sd(p2), aes(x = position, y = average)) +
+    geom_line(color = "darkviolet") +
+    geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
+    labs(x = "Position", y = "Coverage (read count)", title ="Ancestor, downstream") +
+    #ylim(0, 15) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5, size=20),
+          axis.title.x = element_text(size = 16),
+          axis.title.y = element_text(size = 16),
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16))
+  
+  plot3 <- ggplot(get_average_sd(p3), aes(x = position, y = average)) +
+    geom_line(color = "darkorange1") +
+    geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
+    labs(x = "Position", y = "Coverage (read count)", title ="Evolved, upstream") +
+    #ylim(0, 15) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5, size=20),
+          axis.title.x = element_text(size = 16),
+          axis.title.y = element_text(size = 16),
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16))
+  
+  plot4 <- ggplot(get_average_sd(p4), aes(x = position, y = average)) +
+    geom_line(color = "darkorange1") +
+    geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
+    labs(x = "Position", y = "Coverage (read count)", title ="Evolved, downstream") +
+    #ylim(0, 15) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5, size=20),
+          axis.title.x = element_text(size = 16),
+          axis.title.y = element_text(size = 16),
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16))
+  
+  collage <- grid.arrange(plot1, plot2, plot3, plot4, ncol = 2, top=textGrob(X, gp=gpar(fontsize=25)))
+  return(collage)
+}
 
-plot2 <- ggplot(get_average_sd(p2), aes(x = position, y = average)) +
-  geom_line(color = "darkviolet") +
-  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkviolet") +
-  labs(x = "Position", y = "Average Count", title ="Ancestor, downstream") +
-  ylim(0, 15) +
-  theme_minimal() +
-  theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5))
+plot_list <- lapply(values, generate_plots)
+final_plot <- do.call(grid.arrange, c(plot_list, ncol = 2))
+print(final_plot)
 
-plot3 <- ggplot(get_average_sd(p3), aes(x = position, y = average)) +
-  geom_line(color = "darkorange1") +
-  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
-  labs(x = "Position", y = "Average Count", title ="Evolved, upstream") +
-  ylim(0, 15) +
-  theme_minimal() +
-  theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5))
-
-plot4 <- ggplot(get_average_sd(p4), aes(x = position, y = average)) +
-  geom_line(color = "darkorange1") +
-  geom_errorbar(aes(ymin = average - sd, ymax = average + sd), width = 0.2, color = "darkorange1") +
-  labs(x = "Position", y = "Average Count", title ="Evolved, downstream") +
-  ylim(0, 15) +
-  theme_minimal() +
-  theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5))
-
-# Get the title from the file name
-title <- X
-
-# Arrange the plots into a 2x2 grid
-collage <- grid.arrange(plot1, plot2, plot3, plot4, ncol = 2, top = title)
-ggsave(paste0(X, ".png"), collage, width = 10, height = 8, units = "in")
-
-# Display the collage
-print(collage)
+ggsave(paste0("firstsix.pdf"), final_plot, width = 22, height = 30, units = "in")
