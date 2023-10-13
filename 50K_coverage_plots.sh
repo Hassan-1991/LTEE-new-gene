@@ -82,6 +82,15 @@ library(grid)
 
 setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/all_coverages")
 
+function(data) {
+  averages <- data %>%
+    filter(seqtype == "rna") %>%
+    group_by(position) %>%
+    summarize(average = mean(count),
+              sd = sd(count),
+              n = n())
+}
+
 values <- c(
   "Ara+1_31_MOB",
   "Ara+1_35_MOB",
