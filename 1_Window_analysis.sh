@@ -1,4 +1,6 @@
 #This code describes how to make the transcriptome comprised of 400-bp windows
+#And mark the windows with their annotation status
+#The final file is fed into the code of figure 2
 
 #Step-1: Make an initial file with all 400-bp windows in the genome
 
@@ -54,4 +56,70 @@ cp REL606_400_commonwindows.gtf REL607_400_commonwindows.gtf
 
 #BOWTIE AND HTSEQ STEPS#
 
+#htseq generates one file for each experiment, cat them into a .csv file. Then:
 
+sed "s/$/,400/g" htseq_50000gen_400bp_count.csv | sed "1s/^/replicate,seqtype,line,target_id,est_counts,length\n/g" > htseq_50000gen_400bp_count_lengths.csv
+
+#Now we analyze this with R code for generating TPM counts:
+
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+
+setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/100bp")
+
+variable_names <- c("Ara+1", "Ara+2", "Ara+3", "Ara+4", "Ara+5", "Ara-1", "Ara-2", "Ara-3", "Ara-4", "Ara-5", "Ara-6")
+
+for (variable in variable_names) {
+  
+  p1 <- read_tsv(paste0(variable, "_htseq_lengths.tsv"))
+  p1 <- p1 %>% unite("replseqline",c(replicate,seqtype,line),sep="_") %>%
+    group_by(replseqline) %>%
+    summarise(replseqline=replseqline,target_id=target_id,count=count,countsum=sum(count/length),status=status,length=length) %>%
+    separate(replseqline, into = c("replicate", "seqtype","line"),sep="_")
+  p1$tpm <- (((p1$count/p1$length)/(p1$countsum))*1000000)
+  p1 <- p1 %>%
+    group_by(target_id, status) %>%
+    summarise(average_tpm = mean(tpm))
+  write_csv(p1, paste0(variable, "_htseq_tpm.tsv"))
+}
+
+#Back to bash:
+
+sed -i "s/\"//g" htseq_50000gen_400bp_count_lengths_tpm.csv
+
+#Marking as annotated, readthrough, non-coding, antisense...
+
+bedtools intersect -s -a REL606_400_commonwindows.gtf -b REL606.gtf -wo | awk -F '\t' '($19>10)' | cut -f 9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > annot
+grep -vf annot REL606_400_commonwindows.gtf | bedtools intersect -S -wo -a - -b REL606.gtf  | awk -F '\t' '($19>10)' | cut -f9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > antisense
+cat annot antisense | grep -vf - REL606_400_commonwindows.gtf | cut -f9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > intergenic
+cat antisense intergenic > non_coding
+grep -f non_coding REL606_400_commonwindows.gtf | bedtools closest -s -D b -a - -b REL606.gtf | awk -F '\t' '(($19>-300)&&($19<0))' | cut -f 9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > upstream_300
+grep -f non_coding REL606_400_commonwindows.gtf | bedtools closest -s -D b -a - -b REL606.gtf | awk -F '\t' '(($19>-99)&&($19<0))' | cut -f 9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > upstream_99
+grep -f non_coding REL606_400_commonwindows.gtf | bedtools closest -s -D b -a - -b REL606.gtf | awk -F '\t' '(($19>0)&&($19<99))' | cut -f 9 | cut -f 2 -d "\"" | sort -u | sed "s/.*/\"&\"/g" > readthrough
+
+for i in annot antisense intergenic non_coding upstream_300 upstream_99 readthrough; do sed -i "s/\"/,/g" $i; done
+
+grep -vf upstream_99 upstream_300 > upstream_300_only
+grep -vf upstream_300 non_coding > non_upstream
+grep -vf readthrough non_coding > non_readthrough
+
+grep -f annot htseq_50000gen_400bp_count_lengths_tpm.csv | sed "s/$/,annot/g" > test
+grep -f antisense htseq_50000gen_400bp_count_lengths_tpm.csv | sed "s/$/,antisense/g" >> test
+grep -f intergenic htseq_50000gen_400bp_count_lengths_tpm.csv | sed "s/$/,intergenic/g" >> test
+
+grep -f annot test | sed "s/$/,annot/g" > test2
+grep -f upstream_300_only test | sed "s/$/,upstream_300/g" >> test2
+grep -f upstream_99 test | sed "s/$/,upstream_99/g" >> test2
+grep -f non_upstream test | sed "s/$/,nonreadthrough/g" >> test2
+
+grep -f annot test2 | sed "s/$/,annot/g" > htseq_50000gen_400bp_count_lengths_tpm_marked.csv
+grep -f readthrough test2 | sed "s/$/,readthrough/g" >> htseq_50000gen_400bp_count_lengths_tpm_marked.csv
+grep -f non_readthrough test2 | sed "s/$/,nonreadthrough/g" >> htseq_50000gen_400bp_count_lengths_tpm_marked.csv
+
+sed -i "1s/^/replicate,seqtype,line,target_id,est_counts,countsum,length,tpm,annot_status,upstream_status,readthrough_status\n/g" htseq_50000gen_400bp_count_lengths_tpm_marked.csv
+
+#Get rid of the few cases that are difficult to classify - ones that do overlap with annotated features but with <10bp of overlap
+
+grep -f non_coding REL606_400_commonwindows.gtf | bedtools closest -s -D b -a - -b REL606.gtf | awk -F '\'t '($19==0)' | cut -f 9 | cut -f 2 -d "\"" | sort -u | sed "s/^/,/g" | sed "s/$/,/g" > difficult_to_classify
+grep -vf difficult_to_classify htseq_50000gen_400bp_count_lengths_tpm_marked.csv > htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv
