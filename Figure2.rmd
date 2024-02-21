@@ -1,0 +1,1121 @@
+---
+title: "LTEE manuscript, tpm across windows bar plots"
+output: html_document
+date: "2024-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###50K###
+
+```{r 50K, 400bp, rna, readthrough+, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8ccec", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_rna_readthrough+_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, rna, readthrough-, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#806cb4", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_rna_readthrough-_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, ribo, readthrough+, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="ribo") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8eccc", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 250) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_ribo_readthrough+_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, ribo, readthrough-, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="ribo") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#90cc7c", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 250) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_ribo_readthrough-_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, rna, readthrough+, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8ccec", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 3500) +
+  
+  #scale_y_continuous(breaks = seq(0, 3500, by = 500)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_rna_readthrough+_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, rna, readthrough-, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#806cb4", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 3500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  #scale_y_continuous(breaks = seq(0, 3500, by = 500)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_rna_readthrough-_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, ribo, readthrough+, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="ribo") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8eccc", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 1500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  #scale_y_continuous(breaks = seq(0, 1500, by = 250)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_ribo_readthrough+_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r 50K, 400bp, ribo, readthrough-, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  filter(seqtype=="ribo") %>%
+  #filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+#custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+#                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(line, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(line) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$line <- factor(modified_data$line, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = line, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#90cc7c", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 1500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  #scale_y_continuous(breaks = seq(0, 1500, by = 250)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/50K_400bp_ribo_readthrough-_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+###TIMESERIES###
+
+```{r timeseries, 400bp, rna, readthrough+, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/htseq_timeseries_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  #filter(seqtype=="rna") %>%
+  filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+#custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+#custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(strain, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(strain) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = strain, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8ccec", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  #scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/timeseries_400bp_rna_readthrough+_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r timeseries, 400bp, rna, readthrough-, 5tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/htseq_timeseries_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  #filter(seqtype=="rna") %>%
+  filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+#custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+#custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 5) %>%
+  group_by(strain, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(strain) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = strain, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#806cb4", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  #scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/timeseries_400bp_rna_readthrough-_5tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r timeseries, 400bp, rna, readthrough+, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/htseq_timeseries_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  #filter(seqtype=="rna") %>%
+  filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+  #filter(upstream_status=="nonreadthrough") %>%
+  #filter(readthrough_status=="nonreadthrough")
+
+
+custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+#custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+#custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(strain, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(strain) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = strain, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#d8ccec", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "gray50", size = 2) +  # Increased line size
+  ylim(0, 2500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  #scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/timeseries_400bp_rna_readthrough+_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+```{r timeseries, 400bp, rna, readthrough-, 1tpm}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/htseq_timeseries_400bp_count_lengths_tpm_marked_final.csv")
+
+# Assuming your dataframe is named "p1"
+# Filter the data for rows where "tpm" exceeds 5
+filtered_data <- p2 %>%
+  #filter(seqtype=="rna") %>%
+  filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") %>%
+  filter(upstream_status=="nonreadthrough") %>%
+  filter(readthrough_status=="nonreadthrough")
+
+
+custom_order <- c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483",
+                  "ZDB486", "ZDB488", "ZDB309", "ZDB17", "ZDB25", "11364")
+
+#custom_order <-  c("REL606","REL607","Ara+1","Ara+2","Ara+3","Ara+4","Ara+5","Ara-1","Ara-2","Ara-3","Ara-4","Ara-5","Ara-6")
+#custom_labels <- c("Ara+3" = "Ara+3*", "Ara-1" = "Ara-1*", "Ara-2" = "Ara-2*", "Ara-3" = "Ara-3*", "Ara-4" = "Ara-4*")
+
+modified_data <- filtered_data %>%
+  filter(tpm > 1) %>%
+  group_by(strain, replicate) %>%
+  summarise(count_target_ids = n_distinct(target_id))
+
+modified_data <- modified_data %>%
+  group_by(strain) %>%
+  summarise(
+    mean_value = mean(count_target_ids),
+    higher_value = max(count_target_ids),
+    lower_value = min(count_target_ids)
+  ) %>%
+  ungroup()
+
+modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+#modified_data$strain <- factor(modified_data$strain, levels = custom_order)
+
+# Create ggplot bar plot with points
+ggplot(modified_data, aes(x = strain, y = mean_value)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), fill = "#806cb4", color = "gray50", width = 0.7) +  # Increased space between bars
+  # Add points for higher and lower values
+  geom_point(aes(y = higher_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  geom_point(aes(y = lower_value), position = position_dodge(width = 0.7), color = "red", size = 2) +  # Increased line size
+  ylim(0, 2500) +
+  
+  #scale_y_continuous(breaks = seq(0, 600, by = 100)) +
+  #scale_x_discrete(labels = function(x) ifelse(x %in% names(custom_labels), custom_labels[x], x)) +
+  
+  # Remove plot title and axis titles
+  labs(
+    title = NULL,
+    x = NULL,
+    y = NULL
+  ) +
+  
+  # Increase axis text font size
+  theme_minimal(base_size = 14) +  # Increased font size
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "black", size=18),
+    axis.text.y = element_text(color = "black", size=18),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    legend.position = "none",
+    panel.grid.major.x = element_blank(),  # Remove vertical gridlines
+    panel.grid.minor.x = element_blank(),   # Remove vertical gridlines
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/timeseries_400bp_rna_readthrough-_1tpm.pdf", plot = last_plot(), width = 10, height = 6, units = "in", bg = "transparent")
+```
+
+###K-S plots###
+
+```{r 50K, 400bp, rna, Ara+}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked.csv")
+
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  filter(line=="REL607"|line=="Ara+1"|line=="Ara+2"|line=="Ara+3"|line=="Ara+4"|line=="Ara+5") %>%
+  filter(annot_status!="annot") #%>%
+#filter(upstream_status=="nonreadthrough") %>%
+#filter(readthrough_status=="nonreadthrough")
+
+# Create a sequence of TPM cutoffs from 0 to 20000
+tpm_cutoffs <- seq(-0.001, 10, by = 0.1)
+
+# Initialize an empty list to store plot dataframes
+plot_data_list <- list()
+
+# Loop through distinct values in "line"
+for (line_value in unique(filtered_data$line)) {
+  # Subset dataframe for the specific "line"
+  line_data <- filtered_data[filtered_data$line == line_value, ]
+  
+  # Initialize an empty vector to store the fraction passing each cutoff
+  fraction_passed <- numeric(length(tpm_cutoffs))
+  
+  # Calculate the fraction passing each cutoff
+  for (i in seq_along(tpm_cutoffs)) {
+    fraction_passed[i] <- sum(line_data$tpm > tpm_cutoffs[i]) / nrow(line_data)
+  }
+  
+  # Calculate 1 - fraction_passed to represent the correct fraction passed
+  
+  # Create a dataframe for plotting
+  plot_data <- data.frame(TPM_Cutoff = tpm_cutoffs, Fraction_Passed = fraction_passed, Line = line_value)
+  
+  # Add the dataframe to the list
+  plot_data_list[[line_value]] <- plot_data
+}
+
+# Combine the dataframes from the list into one dataframe
+combined_plot_data <- do.call(rbind, plot_data_list)
+
+line_colors <- c(
+  REL607 = "red",
+  `Ara+1` = "lightskyblue",
+  `Ara+2` = "lightskyblue1",
+  `Ara+3` = "steelblue1",
+  `Ara+4` = "royalblue1",
+  `Ara+5` = "darkslategray1"
+)
+
+# Create ggplot cumulative distribution plot
+ggplot(combined_plot_data, aes(x = TPM_Cutoff, y = Fraction_Passed, color = Line)) +
+  geom_line(size = 1) +
+  labs(
+    x = "TPM",
+    y = "Fraction of windows"
+  ) +
+  scale_x_continuous(breaks = seq(0, 15, by = 1)) +
+  scale_color_manual(values = line_colors) +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(size = 14),  # Adjust the size as needed
+    axis.text.y = element_text(size = 14),
+    axis.title.x = element_text(size = 16), # Adjust the size as needed
+    axis.title.y = element_text(size = 16),# Adjust the size as needed
+    legend.text = element_text(size = 12),  # Adjust the size as needed
+    legend.title = element_text(size = 14),
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/ksplot_Ara+.pdf", width = 10, height = 6, units = "in", device = "pdf", bg = "transparent")
+
+
+```
+
+```{r 50K, 400bp, rna, Ara-}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/htseq_50000gen_400bp_count_lengths_tpm_marked.csv")
+
+filtered_data <- p2 %>%
+  filter(seqtype=="rna") %>%
+  filter(line=="REL606"|line=="Ara-1"|line=="Ara-2"|line=="Ara-3"|line=="Ara-4"|line=="Ara-5"|line=="Ara-6") %>%
+  filter(annot_status!="annot") #%>%
+#filter(upstream_status=="nonreadthrough") %>%
+#filter(readthrough_status=="nonreadthrough")
+
+# Create a sequence of TPM cutoffs from 0 to 20000
+tpm_cutoffs <- seq(-0.001, 10, by = 0.1)
+
+# Initialize an empty list to store plot dataframes
+plot_data_list <- list()
+
+# Loop through distinct values in "line"
+for (line_value in unique(filtered_data$line)) {
+  # Subset dataframe for the specific "line"
+  line_data <- filtered_data[filtered_data$line == line_value, ]
+  
+  # Initialize an empty vector to store the fraction passing each cutoff
+  fraction_passed <- numeric(length(tpm_cutoffs))
+  
+  # Calculate the fraction passing each cutoff
+  for (i in seq_along(tpm_cutoffs)) {
+    fraction_passed[i] <- sum(line_data$tpm > tpm_cutoffs[i]) / nrow(line_data)
+  }
+  
+  # Calculate 1 - fraction_passed to represent the correct fraction passed
+  
+  # Create a dataframe for plotting
+  plot_data <- data.frame(TPM_Cutoff = tpm_cutoffs, Fraction_Passed = fraction_passed, Line = line_value)
+  
+  # Add the dataframe to the list
+  plot_data_list[[line_value]] <- plot_data
+}
+
+# Combine the dataframes from the list into one dataframe
+combined_plot_data <- do.call(rbind, plot_data_list)
+
+line_colors <- c(
+  REL606 = "red",
+  `Ara-1` = "palegreen1",
+  `Ara-2` = "seagreen1",
+  `Ara-3` = "springgreen3",
+  `Ara-4` = "chartreuse1",
+  `Ara-5` = "darkolivegreen3",
+  `Ara-6` = "green2"
+)
+
+# Create ggplot cumulative distribution plot
+ggplot(combined_plot_data, aes(x = TPM_Cutoff, y = Fraction_Passed, color = Line)) +
+  geom_line(size = 1) +
+  labs(
+    x = "TPM",
+    y = "Fraction of windows"
+  ) +
+  scale_x_continuous(breaks = seq(0, 15, by = 1)) +
+  scale_color_manual(values = line_colors) +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(size = 14),  # Adjust the size as needed
+    axis.text.y = element_text(size = 14),
+    axis.title.x = element_text(size = 16), # Adjust the size as needed
+    axis.title.y = element_text(size = 16),# Adjust the size as needed
+    legend.text = element_text(size = 12),  # Adjust the size as needed
+    legend.title = element_text(size = 14),
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/400bp/ksplot_Ara-.pdf", width = 10, height = 6, units = "in", device = "pdf", bg = "transparent")
+
+```
+
+```{r timeseries, 400bp, rna}
+p2 <- read.csv("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/htseq_timeseries_400bp_count_lengths_tpm_marked.csv")
+
+filtered_data <- p2 %>%
+  #filter(seqtype=="rna") %>%
+  filter(strain!="ZDB199"&strain!="ZDB200"&strain!="ZDB564"&strain!="CZB154"&strain!="REL6062") %>%
+  filter(annot_status!="annot") #%>%
+#filter(upstream_status=="nonreadthrough") %>%
+#filter(readthrough_status=="nonreadthrough")
+
+# Create a sequence of TPM cutoffs from 0 to 20000
+tpm_cutoffs <- seq(-0.001, 10, by = 0.1)
+
+# Initialize an empty list to store plot dataframes
+plot_data_list <- list()
+
+# Loop through distinct values in "line"
+for (line_value in unique(filtered_data$strain)) {
+  # Subset dataframe for the specific "line"
+  line_data <- filtered_data[filtered_data$strain == line_value, ]
+  
+  # Initialize an empty vector to store the fraction passing each cutoff
+  fraction_passed <- numeric(length(tpm_cutoffs))
+  
+  # Calculate the fraction passing each cutoff
+  for (i in seq_along(tpm_cutoffs)) {
+    fraction_passed[i] <- sum(line_data$tpm > tpm_cutoffs[i]) / nrow(line_data)
+  }
+  
+  # Calculate 1 - fraction_passed to represent the correct fraction passed
+  
+  # Create a dataframe for plotting
+  plot_data <- data.frame(TPM_Cutoff = tpm_cutoffs, Fraction_Passed = fraction_passed, Line = line_value)
+  
+  # Add the dataframe to the list
+  plot_data_list[[line_value]] <- plot_data
+}
+
+# Combine the dataframes from the list into one dataframe
+combined_plot_data <- do.call(rbind, plot_data_list)
+
+line_colors <- c(
+  `REL6061` = "red",
+  `ZDB409` = "khaki",
+  `ZDB425` = "yellow",
+  `ZDB445` = "yellow3",
+  `ZDB467` = "#7FFFD4",
+  `ZDB483` = "#98FB98",
+  `ZDB486` = "#90EE90",
+  `ZDB488` = "#66CDAA",
+  `ZDB309` = "#8FBC8F",
+  `ZDB17` = "#20B2AA",
+  `ZDB25` = "#3CB371",
+  `11364` = "#2E8B57"
+)
+
+combined_plot_data$Line <- factor(combined_plot_data$Line, levels = c("REL6061", "ZDB409", "ZDB425", "ZDB445", "ZDB467", "ZDB483","ZDB486","ZDB488","ZDB309","ZDB17","ZDB25","11364"))
+
+# Create ggplot cumulative distribution plot
+ggplot(combined_plot_data, aes(x = TPM_Cutoff, y = Fraction_Passed, color = Line)) +
+  geom_line(size = 1) +
+  
+  # Add a specific curve on top (in this case, "REL6061")
+  geom_line(data = subset(combined_plot_data, Line == "REL6061"), aes(x = TPM_Cutoff, y = Fraction_Passed, color = Line), size = 1) +
+  
+  labs(
+    title = "Cumulative Distribution Plot",
+    x = "TPM Cutoff",
+    y = "Fraction of Target IDs Passed"
+  ) +
+  scale_x_continuous(breaks = seq(0, 15, by = 1)) +
+  scale_color_manual(values = line_colors) +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(size = 14),  # Adjust the size as needed
+    axis.text.y = element_text(size = 14),
+    axis.title.x = element_text(size = 16), # Adjust the size as needed
+    axis.title.y = element_text(size = 16),# Adjust the size as needed
+    legend.text = element_text(size = 12),  # Adjust the size as needed
+    legend.title = element_text(size = 14),
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    axis.ticks = element_line(color = "black", size = 0.7)
+  )
+
+ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0620_slidingwindow/step2_gmapping/timeseries_400bp/ksplot_timeseries.pdf", width = 10, height = 6, units = "in", device = "pdf", bg = "transparent")
+
+```
