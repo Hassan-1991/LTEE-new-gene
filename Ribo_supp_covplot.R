@@ -759,6 +759,8 @@ ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/
 
 ############TIMESERIES###############
 
+#This is a lot of manual work
+
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
@@ -766,32 +768,32 @@ library(stringr)
 
 setwd("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/timeseries")
 
-#X <- "INS_2103915_CAGCCAGCCAGCCAGCCAGCCAGC"
-#X <- "MOB_1101970_IS150"
-#X <- "MOB_1462266_IS150"
 #X <- "MOB_1776434_IS150"
-#X <- "MOB_3015771_IS150"
 #X <- "MOB_4110237_IS150"
-X <- "MOB_4415710_IS150"
+#X <- "MOB_4415710_IS150"
 #X <- "SNP_2446984_C"
 #X <- "SNP_3475057_T"
+#X <- "MOB_3015771_IS150"
+#X <- "MOB_1101970_IS150"
+#X <- "MOB_1462266_IS150"
+X <- "INS_2103915_CAGCCAGCCAGCCAGCCAGCCAGC"
 
 Y <- c("REL606",
        "Ara-3_5000gen_ZDB409",
        "Ara-3_10000gen_ZDB425",
        "Ara-3_15000gen_ZDB445",
        "Ara-3_20000gen_ZDB467",
-       "Ara-3_25000gen_ZDB483",
-       "Ara-3_25000gen_ZDB486",
+       #"Ara-3_25000gen_ZDB483",
+       #"Ara-3_25000gen_ZDB486",
        "Ara-3_25000gen_ZDB488",
-       "Ara-3_27000gen_ZDB309",
-       "Ara-3_30000gen_ZDB17",
+       #"Ara-3_27000gen_ZDB309",
+       #"Ara-3_30000gen_ZDB17",
        "Ara-3_31500gen_ZDB199",
-       "Ara-3_31500gen_ZDB200",
-       "Ara-3_31500gen_ZDB25",
-       "Ara-3_31500gen_ZDB564",
-       "Ara-3_33000gen_CZB154",
-       "Ara-3_50000gen_11364")
+       "Ara-3_31500gen_ZDB200")#,
+       #"Ara-3_31500gen_ZDB25",
+       #"Ara-3_31500gen_ZDB564")#,
+       #"Ara-3_33000gen_CZB154"#,
+       #"Ara-3_50000gen_11364")
 
 for (value in Y) {
   p1 <- read.csv(paste0(X, "_down_coverage_", value), sep = '\t')
@@ -814,7 +816,15 @@ for (value in Y) {
                    color = "#FFDAB9", size = 0.3, linetype = "dashed", position = position_dodge(width = 0.2)) +
       geom_line(color = "darkorange1", size = 1.5, position = position_dodge(width = 0.2)) +
       labs(x = "Position", y = "Coverage (read count)") +
-      ylim(0,60) +
+      #ylim(0,400) + #MOB_1776434_IS150.pdf
+      #ylim(0,30) + #MOB_4110237_IS150.pdf
+      #ylim(0,60) + #MOB_4415710_IS150.pdf
+      #ylim(0,30) + #SNP_2446984_C.pdf
+      #ylim(0,30) + #SNP_3475057_T.pdf
+      #ylim(0,60) + #MOB_3015771_IS150.pdf
+      #ylim(0,30) + #MOB_1101970_IS150.pdf
+      #ylim(0,60) + #MOB_1462266_IS150.pdf
+      ylim(0,30) + #INS_2103915_CAGCCAGCCAGCCAGCCAGCCAGC.pdf
       theme_minimal() +
       theme(
         legend.position = "none",
@@ -839,6 +849,12 @@ collage <- grid.arrange(grobs = plots_list[Y], ncol = 5)
 # Display the collage
 print(collage)
 
-
-###
-
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_1776434_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_4110237_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_4415710_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/SNP_2446984_C.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/SNP_3475057_T.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_3015771_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_1101970_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/MOB_1462266_IS150.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
+#ggsave("/stor/work/Ochman/hassan/LTEE_analysis/LTEE_data/post_committee_meeting/0622_post_rejection/newTS_plots/INS_2103915_CAGCCAGCCAGCCAGCCAGCCAGC.pdf", collage, width = 60, height = 40, units = "cm", limitsize=FALSE)
