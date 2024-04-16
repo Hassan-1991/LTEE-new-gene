@@ -1,3 +1,6 @@
+#This code describes the proto-gene pipeline until coverage plot generation
+#Dataset: TIMESERIES
+
 #Get all mutation IDs for the TS dataset
 #Put all genomes of these clones in one file too
 
