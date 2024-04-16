@@ -1,6 +1,4 @@
-#First, make bedfiles out of the mutations for easier grepping
-
-###########FINISH THE REST TOMORROW##########
+#This code describes how to make coverage plots for proto-genes in the TS dataset
 
 #To make coverage plots out of paired-end data, bam files with only R1 reads need to be generated
 
