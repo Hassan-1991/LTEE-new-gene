@@ -1,4 +1,4 @@
-#50K dataset
+#This code describes how to make coverage plots for proto-genes in the 50K dataset
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do grep -v "#" "$i"_50000gen_[0-9][0-9][0-9][0-9][0-9].gd | sed "s/^/"$i"\t/g" | awk -F '\t' '{OFS=""}{print $1,"_",$3,"_",$2,"\t",$0}'; done | cut -f 1,6- > 50k_ancestorcoords.gd
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do grep -v "#" "$i"_50000gen*applied.gd | sed "s/^/"$i"\t/g" | awk -F '\t' '{OFS=""}{print $1,"_",$3,"_",$2,"\t",$0}'; done > 50k_applied.gd
