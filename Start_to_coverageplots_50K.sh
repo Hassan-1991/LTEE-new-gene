@@ -1,11 +1,5 @@
-#UPDATES:
-
-#Large scale: instead of using -s -v, get rid of those with more than say 15 bp of overlap. Otherwise a lot of Mob plus down are lost.
-#After extracting sequences (first step), align them to see how map. Sometimes the two sequences have nothing in common at all?
-#This will also check/verify the blast approach.
-#Afterwards, check promoters, rhoterm, arnold.
-
-#Construct ancestral transcriptomes using .gd (not applied.gd) files, as the latter refer to evolved coordinates and are therefore useless.
+#This code describes the proto-gene pipeline until coverage plot generation
+#Dataset: 50K
 
 for i in Ara+1 Ara+2 Ara+3 Ara+4 Ara+5 Ara-1 Ara-2 Ara-3 Ara-4 Ara-5 Ara-6; do
 grep -v "#" ../"$i"_50000gen-applied.gd | grep -v "INV" | sed "s/IS1\t-1/IS1_-1/g" | sed "s/IS1\t1/IS1_1/g" | sed "s/IS3\t-1/IS3_-1/g" | sed "s/IS3\t1/IS3_1/g" | sed "s/IS4\t-1/IS4_-1/g" | sed "s/IS4\t1/IS4_1/g" | sed "s/IS150\t-1/IS150_-1/g" | sed "s/IS150\t1/IS150_1/g" | sed "s/IS186\t-1/IS186_-1/g" | sed "s/IS186\t1/IS186_1/g" | awk '{ for (i=1; i<=NF; i++) { if (i == 1 || i == 2 || $i ~ /(applied_start=|applied_end=)/) printf "%s ", $i } printf "\n" }' | sed "s/applied_end=//g" | sed "s/applied_start=//g" | awk -v var="$i" -F ' ' '{OFS=""}{print "REL606\t.\tCDS\t",$3,"\t",$3+500,"\t.\t+\t0\ttranscript_id \"",var,"_",$2,"_",$1,"_plus_down_500\";gene_id \"",var,"_",$2,"_",$1,"_plus_down_500\";"}' > "$i"_evolved.gtf
